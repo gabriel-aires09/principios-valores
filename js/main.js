@@ -18,7 +18,116 @@ document.querySelectorAll('.theme-toggle').forEach(btn => {
   });
 });
 
-// Reveal de seções no scroll
+// ── SIDEBAR ────────────────────────────────────────────────
+const SIDEBAR_KEY = 'portfolio-sidebar';
+
+function setSidebarState(state) {
+  document.documentElement.setAttribute('data-sidebar-state', state);
+  localStorage.setItem(SIDEBAR_KEY, state);
+}
+
+// Sync with what the anti-flash script already set
+var savedSidebar = localStorage.getItem(SIDEBAR_KEY) || 'expanded';
+document.documentElement.setAttribute('data-sidebar-state', savedSidebar);
+
+// Hamburger toggle — collapses/expands on desktop, opens overlay on mobile
+var sidebarToggle = document.getElementById('sidebarToggle');
+var sidebar        = document.getElementById('sidebar');
+var sidebarOverlay = document.getElementById('sidebarOverlay');
+
+function openMobileSidebar() {
+  if (!sidebar) return;
+  sidebar.classList.add('mobile-open');
+  if (sidebarOverlay) sidebarOverlay.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileSidebar() {
+  if (!sidebar) return;
+  sidebar.classList.remove('mobile-open');
+  if (sidebarOverlay) sidebarOverlay.classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+if (sidebarToggle) {
+  sidebarToggle.addEventListener('click', function () {
+    if (window.innerWidth <= 740) {
+      openMobileSidebar();
+    } else {
+      var current = document.documentElement.getAttribute('data-sidebar-state');
+      setSidebarState(current === 'collapsed' ? 'expanded' : 'collapsed');
+    }
+  });
+}
+
+// Sidebar group toggle (open/close submenu in expanded mode)
+document.querySelectorAll('.sidebar-group-toggle').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var group = btn.closest('.sidebar-group');
+    if (document.documentElement.getAttribute('data-sidebar-state') === 'collapsed') {
+      setSidebarState('expanded');
+    }
+    var isOpen = group.classList.toggle('open');
+    btn.setAttribute('aria-expanded', isOpen.toString());
+  });
+});
+
+// Tooltip for collapsed sidebar items
+var sidebarTooltip = document.createElement('div');
+sidebarTooltip.className = 'sidebar-tooltip';
+sidebarTooltip.setAttribute('role', 'tooltip');
+document.body.appendChild(sidebarTooltip);
+
+function sidebarTooltipLabel(item) {
+  var textEl = item.querySelector('.sidebar-text');
+  return (textEl ? textEl.textContent : item.getAttribute('title') || item.getAttribute('aria-label') || '').trim();
+}
+
+function canShowSidebarTooltip() {
+  return window.innerWidth > 740 && document.documentElement.getAttribute('data-sidebar-state') === 'collapsed';
+}
+
+function showSidebarTooltip(item) {
+  if (!canShowSidebarTooltip()) return;
+
+  var label = sidebarTooltipLabel(item);
+  if (!label) return;
+
+  var rect = item.getBoundingClientRect();
+  sidebarTooltip.textContent = label;
+  sidebarTooltip.style.top = (rect.top + rect.height / 2) + 'px';
+  sidebarTooltip.classList.add('visible');
+}
+
+function hideSidebarTooltip() {
+  sidebarTooltip.classList.remove('visible');
+}
+
+document.querySelectorAll('.sidebar-link, .sidebar-group-toggle').forEach(function (item) {
+  item.addEventListener('mouseenter', function () { showSidebarTooltip(item); });
+  item.addEventListener('focus', function () { showSidebarTooltip(item); });
+  item.addEventListener('mouseleave', hideSidebarTooltip);
+  item.addEventListener('blur', hideSidebarTooltip);
+});
+
+window.addEventListener('resize', hideSidebarTooltip);
+document.addEventListener('scroll', hideSidebarTooltip, true);
+
+if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+document.addEventListener('click', function (e) {
+  if (!sidebar || !sidebar.classList.contains('mobile-open')) return;
+  if (window.innerWidth > 740) return;
+  if (sidebar.contains(e.target) || (sidebarToggle && sidebarToggle.contains(e.target))) return;
+
+  closeMobileSidebar();
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeMobileSidebar();
+});
+
+// ── REVEAL NO SCROLL ───────────────────────────────────────
 const io = new IntersectionObserver(
   entries => entries.forEach(e => {
     if (e.isIntersecting) {
@@ -29,62 +138,3 @@ const io = new IntersectionObserver(
   { threshold: 0.07, rootMargin: '0px 0px -50px 0px' }
 );
 document.querySelectorAll('.topic').forEach(t => io.observe(t));
-
-// Link ativo na nav com base na seção visível
-const ioNav = new IntersectionObserver(
-  entries => entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    document.querySelectorAll('.nav-links a').forEach(a => {
-      const href = a.getAttribute('href');
-      if (!href) return;
-      // Suporte a links absolutos (#id) e relativos (../unidade-1/)
-      const isMatch =
-        href === '#' + e.target.id ||
-        (href.includes('unidade') && e.target.id?.includes('unidade'));
-      a.classList.toggle('active', isMatch);
-    });
-  }),
-  { rootMargin: '-40% 0px -50% 0px' }
-);
-document.querySelectorAll('[id]').forEach(s => ioNav.observe(s));
-
-// ── DROPDOWN DE NAVEGAÇÃO ──────────────────────────────────
-document.querySelectorAll('.nav-dropdown').forEach(function (dd) {
-  var toggle = dd.querySelector('.nav-dropdown-toggle');
-
-  toggle.addEventListener('click', function (e) {
-    e.stopPropagation();
-    var opening = !dd.classList.contains('open');
-    document.querySelectorAll('.nav-dropdown.open').forEach(function (other) {
-      other.classList.remove('open');
-      other.querySelector('.nav-dropdown-toggle').setAttribute('aria-expanded', 'false');
-    });
-    if (opening) {
-      dd.classList.add('open');
-      toggle.setAttribute('aria-expanded', 'true');
-    }
-  });
-});
-
-document.addEventListener('click', function () {
-  document.querySelectorAll('.nav-dropdown.open').forEach(function (dd) {
-    dd.classList.remove('open');
-    dd.querySelector('.nav-dropdown-toggle').setAttribute('aria-expanded', 'false');
-  });
-});
-
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.nav-dropdown.open').forEach(function (dd) {
-      dd.classList.remove('open');
-      dd.querySelector('.nav-dropdown-toggle').setAttribute('aria-expanded', 'false');
-    });
-  }
-});
-
-// Pausar animações SMIL se o usuário preferir movimento reduzido
-if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  document.querySelectorAll('animateTransform, animate').forEach(a => {
-    a.setAttribute('begin', 'indefinite');
-  });
-}

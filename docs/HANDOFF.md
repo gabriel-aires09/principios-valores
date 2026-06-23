@@ -1,7 +1,7 @@
 # HANDOFF — Portfólio Acadêmico · Gabriel Aires
 
 > Documento de continuidade. Atualizado em cada sessão de desenvolvimento.
-> Última atualização: 2026-06-23 (sessão 2)
+> Última atualização: 2026-06-23 (sessão 4)
 
 ---
 
@@ -103,57 +103,159 @@ Também sobrescreve hardcodes: cor do `nav`, hover de `.unit-card--active`, fund
 ### Tipografia base
 `html { font-size: 19px; }` — aumentado de 16px em sessão anterior. Todos os tamanhos usam `rem`, então escalam automaticamente.
 
-### Nav links (ajustado na sessão 2)
-| Propriedade | Valor anterior | Valor atual |
-|---|---|---|
-| `font-size` | `0.82rem` | `0.7rem` |
-| `letter-spacing` | `0.12em` | `0.08em` |
-| `gap` (`.nav-links`) | `2rem` | `1.1rem` |
+### Topbar (sessão 4)
+Cada página tem um `<header class="topbar">` fixo no topo (52px, `z-index: 102`). Estrutura interna:
+- **`.topbar-left`**: contém o hamburger (`#sidebarToggle`, `.topbar-hamburger`) + link de marca (`.topbar-brand` com `.topbar-brand-icon` e `.topbar-brand-text "Portfólio"`)
+- **`.theme-toggle`**: botão de tema, alinhado à direita
 
-Reduzido porque com 9 itens em uppercase a nav quebrava linha em 1920×1080.
+O `#sidebarToggle` tem dupla função: em desktop (>740px) colapsa/expande a sidebar; em mobile (≤740px) abre o overlay.
+
+### Sidebar (substituiu a topnav na sessão 3; atualizada na sessão 4)
+A nav horizontal foi removida. Cada página agora tem um `<aside class="sidebar">` fixo à esquerda com dois estados: **expanded** (240px, ícone + texto) e **collapsed** (64px, apenas ícones centrados). O estado persiste via `localStorage` com chave `'portfolio-sidebar'`.
+
+Na **sessão 4** o `sidebar-header` (que continha hamburger + logo "Portfólio") foi removido da sidebar. O logo e o hamburger foram movidos para a topbar. A sidebar começa direto com `<nav class="sidebar-nav">`.
+
+Variáveis CSS adicionadas ao `:root`:
+```css
+--sidebar-w: 240px;
+--sidebar-w-col: 64px;
+```
+
+`body` tem `padding-left: var(--sidebar-w)` que reduz para `var(--sidebar-w-col)` quando `[data-sidebar-state="collapsed"]` está no `<html>`.
 
 ---
 
-## Dropdown de navegação (sessão 2)
+## Sidebar (sessão 3)
 
-### Estrutura
-As páginas Atividades e Unidade I–V foram agrupadas num único item de nav com dropdown, com label **"Relação: Princípios e Valores"**. O dropdown substitui os 7 `<li>` individuais que causavam overflow na nav.
+### Estados
+| Estado | Atributo no `<html>` | Largura |
+|---|---|---|
+| Expandido | `data-sidebar-state="expanded"` | `240px` |
+| Colapsado | `data-sidebar-state="collapsed"` | `64px` |
+
+O estado é persistido em `localStorage` com chave `'portfolio-sidebar'` e aplicado antes do primeiro render pelo script inline no `<head>` (ver seção "Sistema de temas").
 
 ### Classes CSS
 | Classe | Descrição |
 |---|---|
-| `.nav-dropdown` | Container `<li>` com `position: relative` |
-| `.nav-dropdown-toggle` | Botão que abre/fecha o menu |
-| `.dd-chevron` | SVG do ícone de seta (rotaciona 180° quando aberto) |
-| `.nav-dropdown-menu` | Lista flutuante com `position: absolute` |
+| `.topbar` | `<header>` fixo no topo, altura `--topbar-h` (52px), `z-index: 102` |
+| `.topbar-left` | Flex container à esquerda da topbar (hamburger + brand) |
+| `.topbar-hamburger` | Botão `#sidebarToggle`; em desktop colapsa/expande; em mobile abre overlay |
+| `.topbar-brand` | Link "Portfólio" com ícone circular e texto, em Playfair Display dourado |
+| `.topbar-brand-icon` | `<img>` do favicon SVG (1.4rem) |
+| `.topbar-brand-text` | Span com o texto "Portfólio" |
+| `.sidebar` | `<aside>` fixo à esquerda, `overflow: hidden` para animar a largura |
+| `.sidebar-nav` | `<nav>` interno com a lista de links |
+| `.sidebar-links` | `<ul>` raiz dos links |
+| `.sidebar-link` | Link individual; `.active` marca a página atual |
+| `.sidebar-icon` | Span com SVG do ícone |
+| `.sidebar-roman` | Variante do ícone com numeral romano (Unidades I–V) |
+| `.sidebar-text` | Label do link — some com `max-width: 0 / opacity: 0` no colapsado |
+| `.sidebar-group` | `<li>` com submenu; `.open` abre o submenu, `.active` marca grupo ativo |
+| `.sidebar-group-toggle` | Botão que expande/colapsa o grupo "Relação: P&V" |
+| `.dd-chevron` | Seta do grupo — rotaciona 180° quando `.open` |
+| `.sidebar-submenu` | `<ul>` dos sublinks (Atividades + Unidades) |
+| `.sidebar-sublink` | Sublink; `.active` marca a página atual |
+| `.sidebar-footer` | Rodapé da sidebar — botão de tema |
+| `.sidebar-overlay` | Overlay escuro para mobile (`#sidebarOverlay`) |
+| `.sidebar-mobile-btn` | Botão hamburger para mobile (`#mobileSidebarBtn`) |
 
-### Estado ativo
-- O `.nav-dropdown-toggle` recebe `class="active"` quando a página atual é filha do dropdown (dourado visível na nav).
-- O link da página atual dentro do menu recebe `class="active"`.
+### Estado ativo por página
+| Página | Classe no link | Classe no grupo |
+|---|---|---|
+| Home | `sidebar-link active` no link Home | — |
+| Sobre Mim | `sidebar-link active` no link Sobre Mim | — |
+| Instituição | `sidebar-link active` no link Instituição | — |
+| Atividades | `sidebar-sublink active` no link Atividades | `sidebar-group open active` |
+| Unidade I–V | `sidebar-sublink active` no link correspondente | `sidebar-group open active` |
 
 ### JS (em `main.js`)
-- Click no toggle → abre/fecha; fecha todos os outros dropdowns abertos.
-- Click fora do dropdown → fecha.
-- `Escape` → fecha.
-- `aria-expanded` é atualizado junto com o estado.
+- `#sidebarToggle` click → se `window.innerWidth > 740`: alterna `expanded`/`collapsed` no `<html>` e persiste. Se `≤ 740`: chama `openMobileSidebar()`.
+- `.sidebar-group-toggle` click → se sidebar colapsada, expande-a primeiro; então abre/fecha o grupo.
+- Click no overlay ou `Escape` → fecha a sidebar mobile (`closeMobileSidebar()`).
+- Não existe mais `#mobileSidebarBtn` — o `#sidebarToggle` da topbar serve para ambos os contextos.
 
-### Ao criar nova página filha do dropdown
-Usar o template abaixo no `<ul class="nav-links">`, ajustando o `href` ativo:
+### Mobile
+Abaixo de `740px` a sidebar fica oculta com `transform: translateX(-100%)`. O botão `#mobileSidebarBtn` (hamburger) aparece fixo no topo. `.mobile-open` na sidebar + `.visible` no overlay formam o menu deslizante.
+
+### Anti-flash (atualizado na sessão 3)
+O script inline no `<head>` agora define **tanto** `data-theme` quanto `data-sidebar-state`:
 ```html
-<li class="nav-dropdown">
-  <button class="nav-dropdown-toggle active" aria-haspopup="true" aria-expanded="false">
-    Relação: Princípios e Valores
-    <svg class="dd-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+<script>(function(){var t=localStorage.getItem('portfolio-theme')||'dark';var s=localStorage.getItem('portfolio-sidebar')||'expanded';document.documentElement.setAttribute('data-theme',t);document.documentElement.setAttribute('data-sidebar-state',s);})();</script>
+```
+
+### Template da topbar para novas páginas (subpáginas com `../../`)
+```html
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="topbar-hamburger" id="sidebarToggle" aria-label="Alternar menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <a href="../../" class="topbar-brand">
+      <img src="../../assets/favicon.svg" class="topbar-brand-icon" alt="" aria-hidden="true">
+      <span class="topbar-brand-text">Portfólio</span>
+    </a>
+  </div>
+  <button class="theme-toggle" aria-label="Alternar tema">
+    <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
   </button>
-  <ul class="nav-dropdown-menu">
-    <li><a href="../atividades/">Atividades</a></li>
-    <li><a href="../unidade-1/">Unidade I</a></li>
-    <li><a href="../unidade-2/">Unidade II</a></li>
-    <li><a href="../unidade-3/">Unidade III</a></li>
-    <li><a href="../unidade-4/">Unidade IV</a></li>
-    <li><a href="../unidade-5/" class="active">Unidade V</a></li>
-  </ul>
-</li>
+</header>
+```
+
+### Template da sidebar para novas páginas (subpáginas com `../../`)
+```html
+<aside class="sidebar" id="sidebar">
+  <nav class="sidebar-nav" aria-label="Navegação principal">
+    <ul class="sidebar-links">
+      <li>
+        <a href="../../" class="sidebar-link" title="Home">
+          <span class="sidebar-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+          <span class="sidebar-text">Home</span>
+        </a>
+      </li>
+      <li>
+        <a href="../sobre-mim/" class="sidebar-link" title="Sobre Mim">
+          <span class="sidebar-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          <span class="sidebar-text">Sobre Mim</span>
+        </a>
+      </li>
+      <li>
+        <a href="../instituicao/" class="sidebar-link" title="Instituição">
+          <span class="sidebar-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M3 9h18"/></svg></span>
+          <span class="sidebar-text">Instituição</span>
+        </a>
+      </li>
+      <!-- Para página filha do grupo: sidebar-group open active + aria-expanded="true" + active no sublink -->
+      <!-- Para página fora do grupo: sidebar-group (sem open/active) + aria-expanded="false" -->
+      <li class="sidebar-group [open active]">
+        <button class="sidebar-group-toggle" aria-expanded="[false|true]" title="Relação: P&V">
+          <span class="sidebar-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+          <span class="sidebar-text">Relação: P&V</span>
+          <svg class="dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <ul class="sidebar-submenu">
+          <li><a href="../atividades/" class="sidebar-link sidebar-sublink [active]"><span class="sidebar-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span><span class="sidebar-text">Atividades</span></a></li>
+          <li><a href="../unidade-1/" class="sidebar-link sidebar-sublink [active]"><span class="sidebar-icon sidebar-roman">I</span><span class="sidebar-text">Unidade I</span></a></li>
+          <li><a href="../unidade-2/" class="sidebar-link sidebar-sublink [active]"><span class="sidebar-icon sidebar-roman">II</span><span class="sidebar-text">Unidade II</span></a></li>
+          <li><a href="../unidade-3/" class="sidebar-link sidebar-sublink [active]"><span class="sidebar-icon sidebar-roman">III</span><span class="sidebar-text">Unidade III</span></a></li>
+          <li><a href="../unidade-4/" class="sidebar-link sidebar-sublink [active]"><span class="sidebar-icon sidebar-roman">IV</span><span class="sidebar-text">Unidade IV</span></a></li>
+          <li><a href="../unidade-5/" class="sidebar-link sidebar-sublink [active]"><span class="sidebar-icon sidebar-roman">V</span><span class="sidebar-text">Unidade V</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="theme-toggle" aria-label="Alternar tema">
+      <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+</aside>
+<button class="sidebar-mobile-btn" id="mobileSidebarBtn" aria-label="Abrir menu">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 ```
 
 ---
@@ -161,26 +263,18 @@ Usar o template abaixo no `<ul class="nav-links">`, ajustando o `href` ativo:
 ## Sistema de temas (claro/escuro)
 
 ### Funcionamento
-1. **Anti-flash:** cada `<head>` tem um script inline que lê `localStorage.getItem('portfolio-theme')` e aplica `data-theme` no `<html>` antes do render.
-2. **Toggle:** botão `.theme-toggle` no extremo direito de cada nav (após o `</ul>`), com ícone lua (modo escuro) e sol (modo claro).
+1. **Anti-flash:** cada `<head>` tem um script inline que lê `localStorage` e aplica `data-theme` **e** `data-sidebar-state` no `<html>` antes do render.
+2. **Toggle:** botão `.theme-toggle` no `.sidebar-footer` (rodapé da sidebar), com ícone lua (modo escuro) e sol (modo claro).
 3. **Persistência:** `localStorage` com chave `'portfolio-theme'`. Default: `'dark'`.
-4. **Lógica:** em `js/main.js`, no topo do arquivo.
+4. **Lógica:** em `js/main.js`.
 
-### Ao criar uma nova página (ex.: `unidade-2/index.html`)
+### Ao criar uma nova página
 Copiar o bloco abaixo no `<head>` **depois** do link do CSS:
 ```html
-<script>(function(){var t=localStorage.getItem('portfolio-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+<script>(function(){var t=localStorage.getItem('portfolio-theme')||'dark';var s=localStorage.getItem('portfolio-sidebar')||'expanded';document.documentElement.setAttribute('data-theme',t);document.documentElement.setAttribute('data-sidebar-state',s);})();</script>
 ```
 
-E adicionar o botão de tema no nav **depois do `</ul>`**:
-```html
-<button class="theme-toggle" aria-label="Alternar tema">
-  <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-  <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-</button>
-```
-
-O botão fica automaticamente no extremo direito porque o nav usa `justify-content: space-between` entre `.nav-logo`, `.nav-links` e o botão. Não muda com novos links.
+O botão de tema já está embutido no template da sidebar (`.sidebar-footer`). Não adicionar em outro lugar.
 
 ---
 
@@ -229,7 +323,7 @@ Ainda com placeholders. Quando as imagens estiverem prontas:
 
 2. **Revisar tema claro em mobile:** o tema claro foi implementado mas não foi testado em telas pequenas. Verificar breakpoint `@media (max-width: 740px)` com `data-theme="light"`.
 
-3. **Revisar dropdown em mobile:** o dropdown de nav não tem comportamento definido para telas pequenas (`max-width: 740px`). Avaliar se deve ser acessível via menu hamburger ou mantido como scroll horizontal.
+3. **Testar sidebar em mobile:** a sidebar usa `transform: translateX(-100%)` abaixo de `740px` e desliza como overlay ao clicar o hamburger. Verificar comportamento no iOS Safari (especialmente scroll-lock e tap no overlay).
 
 ---
 
@@ -275,8 +369,12 @@ Usa `.poem-card` com `.poem-stanza` para cada estrofe. Aspas decorativas via `::
 - **Tema claro usa `[data-theme="light"]` no `<html>`**, não uma classe no `<body>` — consistente com como o script inline aplica o tema.
 - **`.units-grid` com `repeat(3, 1fr)`:** era `2fr 1fr 1fr` (primeiro card mais largo); uniformizado para que todos os cards tenham a mesma largura. O override responsivo `grid-column: 1 / -1` no primeiro card também foi removido.
 - **Unidade II nomeada "Ética e Felicidade":** o conteúdo da pasta `conteudo/unidade-2-valores/` cobre ética, tradições filosóficas e felicidade como projeto existencial — não apenas "Ética e Moral" como estava no placeholder inicial.
-- **Nav dropdown agrupa Atividades + Unidade I–V:** label fixo "Relação: Princípios e Valores". Não reverter para itens individuais — eles não cabem em 1920×1080 com 9 itens uppercase.
-- **JS do carrossel e lightbox é inline na página de atividades**, não em `main.js` — decisão intencional para não poluir o script global com lógica de página específica. O `main.js` só contém o código do dropdown (que é global).
+- **Sidebar substituiu a topnav (sessão 3):** a `<nav>` horizontal foi removida de todas as 9 páginas. Não reverter — a nav não comportava 9 itens em uppercase mesmo em 1920×1080.
+- **`overflow: hidden` na `.sidebar`:** necessário para animar a largura sem transbordamento de texto. Impede flyout/tooltip via CSS puro — por isso links colapsados usam atributo `title` nativo para tooltip do browser.
+- **Clicar no grupo em estado colapsado expande a sidebar** (não abre flyout) — decisão deliberada pela limitação do `overflow: hidden`.
+- **`sidebar-header` removido da sidebar (sessão 4):** o logo e o hamburger foram movidos para a topbar para eliminar o visual de "cabeçalho duplo". A sidebar começa direto com `<nav class="sidebar-nav">`. Não reverter.
+- **`#sidebarToggle` unificado na topbar:** antes havia `#sidebarToggle` (desktop, dentro da sidebar) e `#mobileSidebarBtn` (mobile, dentro da topbar). Agora existe apenas `#sidebarToggle` na topbar — o JS decide o comportamento pelo `window.innerWidth`.
+- **JS do carrossel e lightbox é inline na página de atividades**, não em `main.js` — decisão intencional para não poluir o script global com lógica de página específica.
 - **`.act-photo-wrap` vs `.img-slot`:** usar `.act-photo-wrap` quando a imagem é uma foto de atividade sem ratio forçado; usar `.img-slot` quando o aspecto 16/6 (banner) faz sentido.
 
 ---

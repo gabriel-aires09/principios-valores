@@ -9,40 +9,92 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../css/style.css">
-  <script>(function(){var t=localStorage.getItem('portfolio-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+  <script>(function(){var t=localStorage.getItem('portfolio-theme')||'dark';var s=localStorage.getItem('portfolio-sidebar')||'expanded';document.documentElement.setAttribute('data-theme',t);document.documentElement.setAttribute('data-sidebar-state',s);})();</script>
 </head>
 <body>
 
-  <!-- NAVEGAÇÃO -->
-  <nav>
-    <a href="../../" class="nav-logo">
-      <img src="../../assets/favicon.svg" class="nav-logo-icon" alt="" aria-hidden="true">
-      Portfólio
-    </a>
-    <ul class="nav-links">
-      <li><a href="../../">Home</a></li>
-      <li><a href="../sobre-mim/">Sobre Mim</a></li>
-      <li><a href="../instituicao/">Instituição</a></li>
-      <li class="nav-dropdown">
-        <button class="nav-dropdown-toggle active" aria-haspopup="true" aria-expanded="false">
-          Relação: Princípios e Valores
-          <svg class="dd-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <ul class="nav-dropdown-menu">
-          <li><a href="../atividades/">Atividades</a></li>
-          <li><a href="../unidade-1/">Unidade I</a></li>
-          <li><a href="../unidade-2/">Unidade II</a></li>
-          <li><a href="#unidade-3" class="active">Unidade III</a></li>
-          <li><a href="../unidade-4/">Unidade IV</a></li>
-          <li><a href="../unidade-5/">Unidade V</a></li>
-        </ul>
-      </li>
-    </ul>
-    <button class="theme-toggle" aria-label="Alternar tema">
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger" id="sidebarToggle" aria-label="Alternar menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <a href="../../" class="topbar-brand">
+        <img src="../../assets/favicon.svg" class="topbar-brand-icon" alt="" aria-hidden="true">
+        <span class="topbar-brand-text">Portfólio</span>
+      </a>
+    </div>
+    <div class="topbar-right">
+      <img src="../../assets/catolica-logo.png" class="topbar-institution-logo" alt="UniCatólica">
+      <button class="theme-toggle" aria-label="Alternar tema">
       <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    </button>
-  </nav>
+      </button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <nav class="sidebar-nav" aria-label="Navegação principal">
+      <ul class="sidebar-links">
+        <li>
+          <a href="../../" class="sidebar-link" title="Home">
+            <span class="sidebar-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+            <span class="sidebar-text">Home</span>
+          </a>
+        </li>
+        <li>
+          <a href="../sobre-mim/" class="sidebar-link" title="Sobre Mim">
+            <span class="sidebar-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <span class="sidebar-text">Sobre Mim</span>
+          </a>
+        </li>
+        <li>
+          <a href="../instituicao/" class="sidebar-link" title="Instituição">
+            <span class="sidebar-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M3 9h18"/></svg></span>
+            <span class="sidebar-text">Instituição</span>
+          </a>
+        </li>
+        <li>
+          <a href="../atividades/" class="sidebar-link ">
+            <span class="sidebar-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+            <span class="sidebar-text">Atividades</span>
+          </a>
+        </li>
+        <li>
+          <a href="../unidade-1/" class="sidebar-link ">
+            <span class="sidebar-icon sidebar-roman">I</span>
+            <span class="sidebar-text">Unidade I</span>
+          </a>
+        </li>
+        <li>
+          <a href="../unidade-2/" class="sidebar-link ">
+            <span class="sidebar-icon sidebar-roman">II</span>
+            <span class="sidebar-text">Unidade II</span>
+          </a>
+        </li>
+        <li>
+          <a href="../unidade-3/" class="sidebar-link ">
+            <span class="sidebar-icon sidebar-roman">III</span>
+            <span class="sidebar-text">Unidade III</span>
+          </a>
+        </li>
+        <li>
+          <a href="../unidade-4/" class="sidebar-link ">
+            <span class="sidebar-icon sidebar-roman">IV</span>
+            <span class="sidebar-text">Unidade IV</span>
+          </a>
+        </li>
+        <li>
+          <a href="../unidade-5/" class="sidebar-link ">
+            <span class="sidebar-icon sidebar-roman">V</span>
+            <span class="sidebar-text">Unidade V</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- CABEÇALHO DA PÁGINA -->
   <header class="page-header" id="unidade-3">
@@ -51,7 +103,7 @@
       <span aria-hidden="true">›</span>
       Unidade III
     </p>
-    <h1 class="page-header-title">Competências <em>Acadêmicas</em></h1>
+    <h1 class="page-header-title"><em>CompetênciasAcadêmicas</em></h1>
   </header>
 
   <!-- CONTEÚDO -->
@@ -69,28 +121,38 @@
         Entro, pago meu preço em horas e esforço, saio habilitado. Simples assim.
       </p>
       <p>
-        O conteúdo desta unidade colocou em questão exatamente essa visão — e fez isso
-        sem precisar desmontá-la de forma agressiva. Ele simplesmente mostrou o que uma
-        Instituição de Ensino Superior <em>também</em> é, além do diploma: um ambiente
-        de desenvolvimento intelectual e humano em sentido amplo, aberto a iniciativas
-        que vão muito além do currículo obrigatório.
+        O conteúdo desta unidadade mostrou uma nova perspectiva: a faculdade, além do diploma 
+        <em>também</em> um ambiente de desenvolvimento humano em sentido amplo, aberto a iniciativas
+        que vão muito além das atividades curriculares obrigatórias
       </p>
 
       <div class="concept-box">
         <p class="label">A distinção que ficou</p>
         <p>
           Uma IES não é um lugar de passagem — é um lugar de <em>construção</em>.
+          Não é apenas a questão do tempo gasto lá dentro, como também na disposição do 
+          aluno enxergar o que está disponível além da grade curricular: parcerias,
+          projetos, pesquisa, extensão e relações humanas que duram após a formação
           A diferença não está no tempo gasto lá dentro, mas na disposição de enxergar
           o que está disponível além da grade: parcerias, projetos, pesquisa, extensão,
-          relações que duram além da formação.
+          relações que duram além da formação universitária.
         </p>
       </div>
 
       <p>
+        O texto usa uma expressão que achei bastante honesta: universidade "acolhe 
+        projeto pessoais vinculados ao conhecimento". Ela, necessariamente, exige estes
+        projeto, o aluno pode optar em não fazê-los. 
+
+
         O texto usa uma expressão que achei honesta: a universidade "acolhe projetos
         pessoais vinculados ao conhecimento". Isso é diferente de dizer que ela os exige.
-        A abertura existe — cabe a quem está lá decidir se aproveita ou ignora.
-        Minha visão utilitária não estava errada. Mas era incompleta.
+        A abertura existe — cabe a quem está lá decidir se aproveita ou ignora. Eu acredito,
+        por experiência própria, que o aluno deve aproveitar a oportunidade para criar projetos
+        pessoais vinculados ao conhecimento. Primeiro, porque a possibilidade de investir seus
+        conhecimentos em iniciação científica, como também as ideias formatadas/desenvolvidas
+        podem servir como futuras oportunidades de trabalho. 
+        
         O diploma continua sendo uma meta concreta, mas não pode ser a única lente.
       </p>
 
@@ -106,10 +168,10 @@
       <h2 class="topic-title">Os três pilares que ninguém explicou quando eu entrei</h2>
 
       <p>
-        Ensino, pesquisa e extensão são os três pilares de qualquer IES. O material chama
-        essa combinação de <em>indissociável</em> — não é possível ter uma universidade
-        de verdade com apenas um ou dois deles. Cada pilar afeta os outros de formas
-        que não são sempre óbvias de início.
+        Ensino, pesquisa e extensão são os pilares de qualquer Instituição de Ensino Superior.
+        Essa combinação, conforme material é <em>indissociável</em>. Não é possível ter uma
+        univseridade de verdade com apenas um ou dois dos elementos citados. Cada pilar afeta
+        os outros e que, não são sempre óbvias de serem percebidas.
       </p>
 
       <div class="relations-grid">
@@ -227,7 +289,10 @@
         mais o conteúdo do que o contexto — as conversas com professores sobre trajetória,
         os projetos que existem fora da sala de aula, as conexões que só aparecem quando
         alguém decide procurá-las. O texto chama isso de "mentoria informal", e a falta
-        dela é um custo que muitos estudantes pagam sem perceber.
+        dela é um custo que muitos estudantes pagam sem perceber. Eu mesmo sofro um pouco disso,
+        sempre fui autodidata e sempre busquei aprender por conta própria conta. Entretanto,
+        assim como você aprende um instrumento sozinho, você gera alguns vícios durante o seu
+        aprendizado, que podem remodelados com alguém com maior experiência no tema. 
       </p>
 
       <figure class="img-slot" id="img-perspectivas">
@@ -298,7 +363,9 @@
         eu escolho fazer dela. O comprometimento institucional com a comunidade depende
         de cada pessoa que está lá dentro. Isso não diminui a responsabilidade da
         instituição, mas distribui uma parte dela para cada estudante. E isso,
-        admitidamente, é mais exigente do que apenas assistir às aulas.
+        admitidamente, é mais exigente do que apenas assistir às aulas. A parte mais fácil é 
+        assistir as aulas, a parte difícil é aplicar os conhecimentos teóricos das aulas em
+        projetos práticos que podem faze diferença no futuro. 
       </p>
     </section>
 
